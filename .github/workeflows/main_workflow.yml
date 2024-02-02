@@ -1,0 +1,16 @@
+on:
+  push:
+  pull_request_target:
+    branches: [master]
+name: Tests / test-sync-upstream
+jobs:
+  run:
+    name: Run
+    runs-on: ubuntu-latest
+    steps:
+    - name: Sync upstream to fork repo
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        owner: Yikf
+        repo: trino # TODO: Use a dedicated repository for workflow testing
+        branch: master

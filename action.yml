@@ -1,0 +1,29 @@
+name: 'Sync upstream repository'
+author: 'Kaifei Yi'
+description: 'Sync a fork of a repository to keep it up-to-date with the upstream repository.'
+branding:
+  icon: 'repeat'
+  color: 'green'
+inputs:
+  token:
+    description: 'The token to use for authentication'
+    required: false
+    default: ${{ secrets.GITHUB_TOKEN }}
+  owner:
+    description: 'The owner of the fork repo'
+    required: true
+  repo:
+    description: 'The name of the fork repo'
+    required: true
+  branch:
+    description: 'The branch of the fork repo'
+    required: false
+    default: 'master'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.token }}
+    - ${{ inputs.owner }}
+    - ${{ inputs.repo }}
+    - ${{ inputs.branch }}
