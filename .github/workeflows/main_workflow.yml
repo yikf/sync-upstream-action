@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Sync upstream to fork repo
+      uses: ./
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         owner: Yikf
