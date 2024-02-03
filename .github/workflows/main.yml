@@ -8,8 +8,10 @@ jobs:
     name: Run
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout source code
+      uses: actions/checkout@v1
     - name: Sync upstream to fork repo
-      uses: ./
+      uses: ./.
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         owner: Yikf
