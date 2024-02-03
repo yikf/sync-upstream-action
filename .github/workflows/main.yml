@@ -1,19 +1,34 @@
 on:
-  push:
-  pull_request_target:
-    branches: [master]
+  schedule:
+    - cron: "0 0 * * *" # every day at 00:00
 name: Tests / test-sync-upstream
 jobs:
   run:
     name: Run
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     steps:
     - name: Checkout source code
       uses: actions/checkout@v1
-    - name: Sync upstream to fork repo
+    - name: Sync trino to fork repo
       uses: ./.
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.SYNC_UPSTREAM_TOKEN }}
         owner: Yikf
-        repo: trino # TODO: Use a dedicated repository for workflow testing
+        repo: trino
+        branch: master
+    - name: Sync kyuubi to fork repo
+      uses: ./.
+      with:
+        token: ${{ secrets.SYNC_UPSTREAM_TOKEN }}
+        owner: Yikf
+        repo: kyuubi
+        branch: master
+    - name: Sync spark to fork repo
+      uses: ./.
+      with:
+        token: ${{ secrets.SYNC_UPSTREAM_TOKEN }}
+        owner: Yikf
+        repo: spark
         branch: master

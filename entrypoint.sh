@@ -1,8 +1,8 @@
 #!/bin/bash
 
-pip3 install -r /sync-requirements/requirements.txt
+pip3 install -r /sync-upstream/requirements.txt
 
-python3 /sync-requirements/sync.py \
+python3 /sync-upstream/sync.py \
 --token "${INPUT_TOKEN}" \
 --owner "${INPUT_OWNER}" \
 --repo "${INPUT_REPO}" \

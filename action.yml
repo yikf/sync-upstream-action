@@ -7,8 +7,7 @@ branding:
 inputs:
   token:
     description: 'The token to use for authentication'
-    required: false
-    default: '${{ secrets.GITHUB_TOKEN }}'
+    required: true
   owner:
     description: 'The owner of the fork repo'
     required: true
