@@ -1,4 +1,6 @@
 import argparse
+import sys
+
 import requests
 
 
@@ -21,24 +23,24 @@ class Synchronizer(object):
             "X-GitHub-Api-Version": "2022-11-28"
         }
         data = {
-            "branch": {self.branch}
+            "branch": f"{self.branch}"
         }
         response = requests.post(sync_url, headers=headers, json=data)
         if response.status_code == 200:
             print("Sync upstream request successful.")
             print(response.json())
         else:
-            print("Sync upstream request failed.")
-            print(response.status_code)
+            print(f"Sync upstream request failed, response code: {response.status_code}")
             print(response.text)
+            sys.exit(1)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Sync a fork branch with the upstream repository via the GitHub API.")
-    parser.add_argument("token", help="GitHub personal access token")
-    parser.add_argument("owner", help="Repository owner")
-    parser.add_argument("repo", help="Repository name")
-    parser.add_argument("branch", help="Branch name")
+    parser.add_argument("--token", help="GitHub personal access token")
+    parser.add_argument("--owner", help="Repository owner")
+    parser.add_argument("--repo", help="Repository name")
+    parser.add_argument("--branch", help="Branch name")
     args = parser.parse_args()
     sync = Synchronizer(args.token, args.owner, args.repo, args.branch)
     sync.sync_upstream()
