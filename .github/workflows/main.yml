@@ -1,7 +1,7 @@
 on:
   schedule:
     - cron: "0 0 * * *" # every day at 00:00
-name: Tests / test-sync-upstream
+name: Schedule / sync-upstream of Yikf's forked repositories
 jobs:
   run:
     name: Run
