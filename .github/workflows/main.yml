@@ -11,13 +11,6 @@ jobs:
     steps:
     - name: Checkout source code
       uses: actions/checkout@v1
-    - name: Sync kyuubi to fork repo
-      uses: ./.
-      with:
-        token: ${{ secrets.SYNC_UPSTREAM_TOKEN }}
-        owner: Yikf
-        repo: kyuubi
-        branch: master
     - name: Sync spark to fork repo
       uses: ./.
       with:
