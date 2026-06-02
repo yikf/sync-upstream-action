@@ -1,6 +1,7 @@
 on:
   schedule:
     - cron: "0 0 * * *" # every day at 00:00
+  workflow_dispatch: # 允许手动触发
 name: Schedule / sync-upstream of Yikf's forked repositories
 jobs:
   run:
@@ -10,25 +11,9 @@ jobs:
       issues: write
     steps:
     - name: Checkout source code
-      uses: actions/checkout@v1
-    - name: Sync kyuubi to fork repo
+      uses: actions/checkout@v4
+    - name: Sync all forked repositories
       uses: ./.
       with:
         token: ${{ secrets.SYNC_UPSTREAM_TOKEN }}
         owner: Yikf
-        repo: kyuubi
-        branch: master
-    - name: Sync spark to fork repo
-      uses: ./.
-      with:
-        token: ${{ secrets.SYNC_UPSTREAM_TOKEN }}
-        owner: Yikf
-        repo: spark
-        branch: master
-    - name: Sync gluten to fork repo
-      uses: ./.
-      with:
-        token: ${{ secrets.SYNC_UPSTREAM_TOKEN }}
-        owner: Yikf
-        repo: incubator-gluten
-        branch: main

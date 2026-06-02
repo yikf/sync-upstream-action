@@ -1,0 +1,12 @@
+Metadata-Version: 2.4
+Name: sync-upstream
+Version: 0.2.0
+Summary: Sync your forked repositories with upstream
+Requires-Python: >=3.7
+License-File: LICENSE
+Requires-Dist: requests>=2.25.1
+Requires-Dist: pyyaml>=6.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0; extra == "dev"
+Requires-Dist: pytest-mock>=3.10; extra == "dev"
+Dynamic: license-file

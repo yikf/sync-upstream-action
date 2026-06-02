@@ -6,23 +6,21 @@ branding:
   color: 'green'
 inputs:
   token:
-    description: 'The token to use for authentication'
+    description: 'The GitHub personal access token to use for authentication'
     required: true
   owner:
-    description: 'The owner of the fork repo'
-    required: true
+    description: 'The owner of the fork repositories'
+    required: false
   repo:
-    description: 'The name of the fork repo'
-    required: true
+    description: 'The name of a single fork repo (legacy mode)'
+    required: false
   branch:
-    description: 'The branch of the fork repo'
+    description: 'The branch name for single repo mode'
     required: false
     default: 'master'
+  config:
+    description: 'Path to config file for advanced configuration'
+    required: false
 runs:
   using: 'docker'
   image: 'Dockerfile'
-  args:
-    - ${{ inputs.token }}
-    - ${{ inputs.owner }}
-    - ${{ inputs.repo }}
-    - ${{ inputs.branch }}

@@ -1,0 +1,25 @@
+[project]
+name = "sync-upstream"
+version = "0.2.0"
+description = "Sync your forked repositories with upstream"
+requires-python = ">=3.7"
+dependencies = [
+    "requests>=2.25.1",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-mock>=3.10",
+]
+
+[project.scripts]
+sync-upstream = "sync_upstream.main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
