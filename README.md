@@ -141,6 +141,38 @@ jobs:
 
 **Note**: Replace `YOUR_GITHUB_USERNAME` with your actual GitHub username, and you may need to create a personal access token with `repo` scope and store it as a secret in your repository.
 
+## 🔒 Security Advice
+
+### Using Secrets in GitHub Actions
+
+Never commit tokens in plaintext to your repository. Use GitHub Secrets for secure storage:
+
+1. Go to your repository → **Settings** → **Secrets and variables** → **Actions**
+2. Click **New repository secret**
+3. Name: `SYNC_UPSTREAM_TOKEN`
+4. Value: Your GitHub Personal Access Token
+5. Use in workflows: `${{ secrets.SYNC_UPSTREAM_TOKEN }}`
+
+### Local Usage Security
+
+1. **Use environment variables** (recommended):
+   ```bash
+   # Add to ~/.bashrc or ~/.zshrc
+   export GITHUB_TOKEN="your_token_here"
+   ```
+
+2. **Use .gitignore**:
+   ```
+   # .gitignore
+   config.yaml
+   *.env
+   ```
+
+3. **Principle of least privilege**:
+   - Use Fine-grained tokens instead of Classic tokens
+   - Only grant necessary permissions (Contents + Workflows)
+   - Set a reasonable expiration time
+
 ### License
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
