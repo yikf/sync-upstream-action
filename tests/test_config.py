@@ -1,10 +1,12 @@
 """Tests for config module"""
+
 import os
 import tempfile
+
 import yaml
-import pytest
+
 from sync_upstream.config import ConfigLoader
-from sync_upstream.models import AppConfig, RepositoryConfig
+from sync_upstream.models import RepositoryConfig
 
 
 def test_config_loader_from_env_token():
@@ -30,13 +32,13 @@ def test_config_loader_from_file():
     config_data = {
         "github_token": "file-token",
         "owner": "file-owner",
-        "repositories": [{"name": "repo1", "branches": ["main", "dev"]}]
+        "repositories": [{"name": "repo1", "branches": ["main", "dev"]}],
     }
-    
+
     with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
         yaml.dump(config_data, f)
         temp_path = f.name
-    
+
     try:
         config = ConfigLoader.load_from_file(temp_path)
         assert config.github_token == "file-token"
@@ -52,13 +54,13 @@ def test_config_loader_from_file_string_repos():
     config_data = {
         "github_token": "file-token",
         "owner": "file-owner",
-        "repositories": ["repo1", "repo2"]
+        "repositories": ["repo1", "repo2"],
     }
-    
+
     with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
         yaml.dump(config_data, f)
         temp_path = f.name
-    
+
     try:
         config = ConfigLoader.load_from_file(temp_path)
         assert len(config.repositories) == 2

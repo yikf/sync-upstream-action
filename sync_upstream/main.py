@@ -1,23 +1,23 @@
 #!/usr/bin/env python3
 import argparse
-import sys
-import os
 import logging
+import sys
+
 from .config import ConfigLoader
 from .github_api import GitHubAPI
 from .scanner import RepositoryScanner
 from .sync import Synchronizer
-from .models import Repository
 
 
 class EmojiLogFormatter(logging.Formatter):
     """Custom log formatter with friendly emojis"""
+
     LEVEL_EMOJIS = {
         logging.DEBUG: "🔍",
         logging.INFO: "✅",
         logging.WARNING: "⚠️",
         logging.ERROR: "❌",
-        logging.CRITICAL: "🔥"
+        logging.CRITICAL: "🔥",
     }
 
     def format(self, record):
@@ -28,9 +28,7 @@ class EmojiLogFormatter(logging.Formatter):
 
 # Configure logging
 handler = logging.StreamHandler()
-formatter = EmojiLogFormatter(
-    '%(emoji)s %(message)s'
-)
+formatter = EmojiLogFormatter("%(emoji)s %(message)s")
 handler.setFormatter(formatter)
 
 root_logger = logging.getLogger()
@@ -38,7 +36,7 @@ root_logger.addHandler(handler)
 root_logger.setLevel(logging.INFO)
 
 # Reduce log noise from other modules
-for logger_name in ['urllib3', 'requests']:
+for logger_name in ["urllib3", "requests"]:
     logging.getLogger(logger_name).setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
@@ -49,9 +47,9 @@ def main():
     parser.add_argument("--config", "-c", help="Path to config file")
     parser.add_argument("--token", "-t", help="GitHub personal access token")
     parser.add_argument("--owner", "-o", help="Repository owner")
-    
+
     args = parser.parse_args()
-    
+
     print("")
     print("╔══════════════════════════════════════════════════════════════╗")
     print("║                    🔄 Sync Upstream Tool                     ║")
@@ -66,17 +64,20 @@ def main():
         else:
             logger.info("Loading configuration from environment variables")
             config = ConfigLoader.load_from_env()
-        
+
         if args.token:
             config.github_token = args.token
         if args.owner:
             config.owner = args.owner
-        
+
         if not config.github_token:
-            logger.error("GitHub token is required. Set via --token, config file, or GITHUB_TOKEN environment variable.")
+            logger.error(
+                "GitHub token is required. Set via --token, config file, or "
+                "GITHUB_TOKEN environment variable."
+            )
             parser.print_help()
             sys.exit(1)
-        
+
         if not config.repositories:
             logger.error("No repositories configured. Please specify repositories in config file.")
             sys.exit(1)
@@ -122,7 +123,7 @@ def main():
             if "error" in detail:
                 error_msg += f" - {detail['error']}"
             print(error_msg)
-    
+
     print("")
 
     sys.exit(0 if results["failed"] == 0 else 1)

@@ -1,4 +1,4 @@
-name: Run tests
+name: Test and Lint
 on:
   push:
     branches: [ "master" ]
@@ -18,5 +18,7 @@ jobs:
       run: curl -LsSf https://astral.sh/uv/install.sh | sh
     - name: Install dependencies with dev
       run: uv venv && uv pip install -e ".[dev]"
+    - name: Run Ruff checks
+      run: uv run ruff check .
     - name: Run tests
       run: uv run pytest tests/ -v --cov=sync_upstream --cov-report=term --cov-report=xml

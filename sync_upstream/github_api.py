@@ -1,7 +1,7 @@
-import requests
 import logging
-from typing import List, Optional, Dict, Any
-from .models import Repository
+from typing import Any, Dict, List, Optional
+
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ class GitHubAPI:
         self.headers = {
             "Accept": "application/vnd.github+json",
             "Authorization": f"Bearer {token}",
-            "X-GitHub-Api-Version": self.API_VERSION
+            "X-GitHub-Api-Version": self.API_VERSION,
         }
 
     def get_current_user(self) -> Dict[str, Any]:
@@ -59,7 +59,7 @@ class GitHubAPI:
         url = f"{self.BASE_URL}/repos/{owner}/{repo}/merge-upstream"
         data = {"branch": branch}
         response = requests.post(url, headers=self.headers, json=data)
-        
+
         if response.status_code == 200:
             logger.info(f"  ✓ Branch {branch} synced successfully")
             return True
@@ -68,6 +68,6 @@ class GitHubAPI:
             try:
                 error_data = response.json()
                 logger.error(f"    Error: {error_data}")
-            except:
+            except ValueError:
                 logger.error(f"    Response: {response.text}")
             return False

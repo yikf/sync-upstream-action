@@ -31,6 +31,7 @@ dev = [
     "pytest>=7.0",
     "pytest-mock>=3.10",
     "pytest-cov>=4.1",
+    "ruff>=0.15.15",
 ]
 
 [project.scripts]
@@ -43,6 +44,13 @@ Repository = "https://github.com/yikf/sync-upstream-action"
 
 [tool.setuptools.packages.find]
 where = ["."]
+
+[tool.ruff]
+line-length = 100
+target-version = "py37"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP"]
 
 [build-system]
 requires = ["setuptools>=61.0"]

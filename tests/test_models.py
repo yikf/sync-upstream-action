@@ -1,6 +1,6 @@
 """Tests for models module"""
-import pytest
-from sync_upstream.models import Repository, RepositoryConfig, AppConfig
+
+from sync_upstream.models import AppConfig, Repository, RepositoryConfig
 
 
 def test_repository_config():
@@ -30,9 +30,7 @@ def test_app_config_with_repositories():
     repo1 = RepositoryConfig(name="repo1", branches=["main"])
     repo2 = RepositoryConfig(name="repo2")
     app_config = AppConfig(
-        github_token="test-token",
-        owner="test-owner",
-        repositories=[repo1, repo2]
+        github_token="test-token", owner="test-owner", repositories=[repo1, repo2]
     )
     assert app_config.github_token == "test-token"
     assert app_config.owner == "test-owner"

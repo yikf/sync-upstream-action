@@ -1,7 +1,8 @@
 import logging
-from typing import List, Optional
+from typing import List
+
 from .github_api import GitHubAPI
-from .models import Repository, RepositoryConfig, AppConfig
+from .models import AppConfig, Repository
 
 logger = logging.getLogger(__name__)
 
@@ -12,15 +13,17 @@ class RepositoryScanner:
         self.github_api = github_api
 
     def scan(self) -> List[Repository]:
-        logger.info("Starting repository scan - only explicitly configured repositories will be synced")
+        logger.info(
+            "Starting repository scan - only explicitly configured repositories will be synced"
+        )
         repos = []
-        
+
         # Ensure owner is set
         if not self.config.owner:
             logger.info("No owner specified, fetching current user")
             user = self.github_api.get_current_user()
             self.config.owner = user["login"]
-        
+
         # Only fetch explicitly configured repositories
         for repo_config in self.config.repositories:
             logger.info(f"Fetching configured repository: {repo_config.name}")
@@ -31,7 +34,7 @@ class RepositoryScanner:
                     name=repo_data["name"],
                     full_name=repo_data["full_name"],
                     is_private=repo_data["private"],
-                    default_branch=repo_data["default_branch"]
+                    default_branch=repo_data["default_branch"],
                 )
                 if "parent" in repo_data:
                     repo.has_upstream = True
@@ -39,8 +42,8 @@ class RepositoryScanner:
                 repos.append(repo)
             else:
                 logger.error(f"Repository {self.config.owner}/{repo_config.name} not found")
-        
+
         repos_with_upstream = [repo for repo in repos if repo.has_upstream]
-        
+
         logger.info(f"Found {len(repos_with_upstream)} repositories to sync with upstream")
         return repos_with_upstream
