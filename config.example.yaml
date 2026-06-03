@@ -5,28 +5,9 @@ github_token: "your_personal_access_token_here"
 # Repository owner (defaults to current user)
 owner: "Yikf"
 
-# Auto scan configuration
-auto_scan:
-  enabled: true
-  include_private: false  # Whether to include private repositories
-
-# Repository list (manually specified)
+# Repository list (must be explicitly specified)
 repositories:
-  # Explicitly included repositories
-  included:
-    - name: "kyuubi"
-      branches: ["master", "branch-1.8", "branch-1.9"]  # Specify branches, empty to sync all
-    - name: "spark"
-      branches: []  # Empty array means sync all branches
-    - name: "incubator-gluten"
-      branches: []
-
-  # Excluded repositories (will not be synced even if found in auto scan)
-  excluded:
-    - "old-fork-repo"
-    - "test-repo"
-
-# Sync configuration
-sync:
-  method: "api"  # "api" uses GitHub API, "git" uses git command (not implemented yet)
-  timeout: 300  # Timeout in seconds for single repository sync
+  - name: "kyuubi"
+    branches: ["master", "branch-1.8", "branch-1.9"]  # Specify branches, optional
+  - name: "spark"  # If branches not specified, only sync default branch
+  - name: "incubator-gluten"

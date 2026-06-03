@@ -45,42 +45,9 @@ def main():
     parser.add_argument("--config", "-c", help="Path to config file")
     parser.add_argument("--token", "-t", help="GitHub personal access token")
     parser.add_argument("--owner", "-o", help="Repository owner")
-    parser.add_argument("--repo", "-r", help="Single repository name (legacy mode)")
-    parser.add_argument("--branch", "-b", help="Single branch name (legacy mode)")
     
     args = parser.parse_args()
     logger.info("Starting sync-upstream")
-
-    # Check if running in legacy single repo mode
-    if args.repo and args.owner and args.token:
-        logger.info(f"Running in legacy single repo mode: {args.owner}/{args.repo}")
-        github_api = GitHubAPI(args.token)
-        branch = args.branch if args.branch else "master"
-        
-        repo_data = github_api.get_repository(args.owner, args.repo)
-        if repo_data:
-            repo = Repository(
-                owner=repo_data["owner"]["login"],
-                name=repo_data["name"],
-                full_name=repo_data["full_name"],
-                is_private=repo_data["private"],
-                default_branch=repo_data["default_branch"]
-            )
-            if "parent" in repo_data:
-                repo.has_upstream = True
-                repo.upstream = repo_data["parent"]["full_name"]
-                logger.info(f"Upstream found: {repo.upstream}")
-            
-            from .models import SyncConfig
-            sync_config = SyncConfig()
-            sync = Synchronizer(github_api, sync_config)
-            from .models import RepositoryConfig
-            repo_config = RepositoryConfig(name=repo.name, branches=[branch])
-            success = sync.sync_repository(repo, repo_config)
-            sys.exit(0 if success else 1)
-        else:
-            logger.error(f"Repository {args.owner}/{args.repo} not found")
-            sys.exit(1)
 
     # Load configuration
     try:
@@ -100,6 +67,10 @@ def main():
             logger.error("GitHub token is required. Set via --token, config file, or GITHUB_TOKEN environment variable.")
             parser.print_help()
             sys.exit(1)
+        
+        if not config.repositories:
+            logger.error("No repositories configured. Please specify repositories in config file.")
+            sys.exit(1)
 
     except Exception as e:
         logger.error(f"Error loading configuration: {e}", exc_info=True)
@@ -109,7 +80,7 @@ def main():
     logger.info("Initializing components")
     github_api = GitHubAPI(config.github_token)
     scanner = RepositoryScanner(config, github_api)
-    synchronizer = Synchronizer(github_api, config.sync)
+    synchronizer = Synchronizer(github_api)
 
     # Scan repositories
     try:
@@ -124,7 +95,7 @@ def main():
 
     # Sync repositories
     logger.info(f"Starting sync for {len(repos)} repositories")
-    repo_configs = config.repositories.get("included", [])
+    repo_configs = config.repositories
     results = synchronizer.sync_repositories(repos, repo_configs)
 
     # Print results

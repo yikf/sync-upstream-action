@@ -5,29 +5,14 @@ from typing import List, Optional
 @dataclass
 class RepositoryConfig:
     name: str
-    branches: List[str] = field(default_factory=list)
-    local_path: Optional[str] = None
-
-
-@dataclass
-class AutoScanConfig:
-    enabled: bool = True
-    include_private: bool = False
-
-
-@dataclass
-class SyncConfig:
-    method: str = "api"
-    timeout: int = 300
+    branches: List[str] = field(default_factory=list)  # Empty means only sync default branch
 
 
 @dataclass
 class AppConfig:
     github_token: str
     owner: Optional[str] = None
-    auto_scan: AutoScanConfig = field(default_factory=AutoScanConfig)
-    repositories: dict = field(default_factory=lambda: {"included": [], "excluded": []})
-    sync: SyncConfig = field(default_factory=SyncConfig)
+    repositories: List[RepositoryConfig] = field(default_factory=list)  # Must specify repositories
 
 
 @dataclass

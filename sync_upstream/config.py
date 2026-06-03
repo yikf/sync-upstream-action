@@ -1,7 +1,7 @@
 import os
 import yaml
 from typing import Optional
-from .models import AppConfig, AutoScanConfig, SyncConfig, RepositoryConfig
+from .models import AppConfig, RepositoryConfig
 
 
 class ConfigLoader:
@@ -30,36 +30,20 @@ class ConfigLoader:
         if not github_token and os.environ.get("GITHUB_TOKEN"):
             github_token = os.environ["GITHUB_TOKEN"]
 
-        auto_scan_data = config_data.get("auto_scan", {})
-        auto_scan = AutoScanConfig(
-            enabled=auto_scan_data.get("enabled", True),
-            include_private=auto_scan_data.get("include_private", False)
-        )
-
-        sync_data = config_data.get("sync", {})
-        sync = SyncConfig(
-            method=sync_data.get("method", "api"),
-            timeout=sync_data.get("timeout", 300)
-        )
-
-        repositories = config_data.get("repositories", {"included": [], "excluded": []})
-        included_repos = []
-        for repo_data in repositories.get("included", []):
+        # Parse repositories - must be explicitly specified
+        repos_config = config_data.get("repositories", [])
+        repositories = []
+        for repo_data in repos_config:
             if isinstance(repo_data, str):
-                included_repos.append(RepositoryConfig(name=repo_data, branches=[]))
+                repositories.append(RepositoryConfig(name=repo_data, branches=[]))
             else:
-                included_repos.append(RepositoryConfig(
+                repositories.append(RepositoryConfig(
                     name=repo_data.get("name"),
-                    branches=repo_data.get("branches", []),
-                    local_path=repo_data.get("local_path")
+                    branches=repo_data.get("branches", [])
                 ))
-
-        excluded_repos = repositories.get("excluded", [])
 
         return AppConfig(
             github_token=github_token,
             owner=config_data.get("owner"),
-            auto_scan=auto_scan,
-            repositories={"included": included_repos, "excluded": excluded_repos},
-            sync=sync
+            repositories=repositories
         )
