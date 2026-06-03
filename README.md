@@ -16,7 +16,16 @@ Sync your forked GitHub repositories with their upstream repositories.
 
 ### Installation with uv
 
-#### Option 1: Just install dependencies and run (simplest)
+#### Option 1: Install from PyPI (recommended)
+```bash
+# Install from PyPI
+uv pip install sync-upstream
+
+# Then you can run it from anywhere
+uv run sync-upstream --owner "Yikf"
+```
+
+#### Option 2: Just install dependencies and run (simplest)
 ```bash
 # Clone the repository
 git clone https://github.com/yikf/sync-upstream-action.git
@@ -29,16 +38,16 @@ uv sync
 uv run python run_sync.py --owner "Yikf"
 ```
 
-#### Option 2: Install as a tool (if you want to use it from anywhere)
+#### Option 3: Install directly from GitHub
 ```bash
-# Install directly from GitHub
+# Install from GitHub
 uv pip install git+https://github.com/yikf/sync-upstream-action.git
 
 # Then you can run it from anywhere
 uv run sync-upstream --owner "Yikf"
 ```
 
-#### Option 3: Editable install (for development)
+#### Option 4: Editable install (for development)
 ```bash
 git clone https://github.com/yikf/sync-upstream-action.git
 cd sync-upstream-action
@@ -133,7 +142,7 @@ jobs:
         run: curl -LsSf https://astral.sh/uv/install.sh | sh
       
       - name: Install sync-upstream
-        run: uv pip install git+https://github.com/yikf/sync-upstream-action.git
+        run: uv pip install sync-upstream
       
       - name: Sync repositories
         run: uv run sync-upstream --token "${{ secrets.GITHUB_TOKEN }}" --owner "YOUR_GITHUB_USERNAME"
@@ -191,7 +200,16 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 
 ### 使用 uv 安装
 
-#### 选项 1：仅安装依赖并运行（最简单）
+#### 选项 1：从 PyPI 安装（推荐）
+```bash
+# 从 PyPI 安装
+uv pip install sync-upstream
+
+# 然后可以在任何地方运行
+uv run sync-upstream --owner "Yikf"
+```
+
+#### 选项 2：仅安装依赖并运行（最简单）
 ```bash
 # 克隆仓库
 git clone https://github.com/yikf/sync-upstream-action.git
@@ -204,16 +222,16 @@ uv sync
 uv run python run_sync.py --owner "Yikf"
 ```
 
-#### 选项 2：作为工具安装（如果想在任何地方使用）
+#### 选项 3：直接从 GitHub 安装
 ```bash
-# 直接从 GitHub 安装
+# 从 GitHub 安装
 uv pip install git+https://github.com/yikf/sync-upstream-action.git
 
 # 然后可以在任何地方运行
 uv run sync-upstream --owner "Yikf"
 ```
 
-#### 选项 3：可编辑模式安装（用于开发）
+#### 选项 4：可编辑模式安装（用于开发）
 ```bash
 git clone https://github.com/yikf/sync-upstream-action.git
 cd sync-upstream-action
@@ -308,7 +326,7 @@ jobs:
         run: curl -LsSf https://astral.sh/uv/install.sh | sh
       
       - name: Install sync-upstream
-        run: uv pip install git+https://github.com/yikf/sync-upstream-action.git
+        run: uv pip install sync-upstream
       
       - name: Sync repositories
         run: uv run sync-upstream --token "${{ secrets.GITHUB_TOKEN }}" --owner "YOUR_GITHUB_USERNAME"
