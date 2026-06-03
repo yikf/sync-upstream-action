@@ -12,8 +12,17 @@ jobs:
     steps:
     - name: Checkout source code
       uses: actions/checkout@v4
-    - name: Sync all forked repositories
-      uses: ./.
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
       with:
-        token: ${{ secrets.SYNC_UPSTREAM_TOKEN }}
-        owner: Yikf
+        python-version: "3.11"
+    
+    - name: Install uv
+      run: curl -LsSf https://astral.sh/uv/install.sh | sh
+    
+    - name: Install dependencies
+      run: uv pip install -e .
+    
+    - name: Sync all forked repositories
+      run: uv run sync-upstream --token "${{ secrets.SYNC_UPSTREAM_TOKEN }}" --owner Yikf
