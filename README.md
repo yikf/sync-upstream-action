@@ -72,7 +72,37 @@ https://github.com/settings/tokens
 
 ### GitHub Actions Schedule
 
-You can use GitHub Actions to run the sync script periodically. See the [workflow file](./.github/workflows/main.yml) in this repository as an example.
+You can use GitHub Actions to run the sync script periodically. Here's an example workflow:
+
+```yaml
+on:
+  schedule:
+    - cron: "0 0 * * *" # 每天 UTC 00:00 执行
+  workflow_dispatch: # 允许手动触发
+
+name: Sync upstream repositories
+
+jobs:
+  run:
+    name: Run Sync
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      
+      - name: Install sync-upstream
+        run: uv pip install git+https://github.com/yikf/sync-upstream-action.git
+      
+      - name: Sync repositories
+        run: uv run sync-upstream --token "${{ secrets.GITHUB_TOKEN }}" --owner "YOUR_GITHUB_USERNAME"
+```
+
+**Note**: Replace `YOUR_GITHUB_USERNAME` with your actual GitHub username, and you may need to create a personal access token with `repo` scope and store it as a secret in your repository.
 
 ### License
 
@@ -148,7 +178,37 @@ https://github.com/settings/tokens
 
 ### GitHub Actions 定时任务
 
-您可以使用 GitHub Actions 定期运行同步脚本。请参考本仓库中的 [工作流文件](./.github/workflows/main.yml) 作为示例。
+您可以使用 GitHub Actions 定期运行同步脚本。以下是一个示例工作流：
+
+```yaml
+on:
+  schedule:
+    - cron: "0 0 * * *" # 每天 UTC 00:00 执行
+  workflow_dispatch: # 允许手动触发
+
+name: Sync upstream repositories
+
+jobs:
+  run:
+    name: Run Sync
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      
+      - name: Install sync-upstream
+        run: uv pip install git+https://github.com/yikf/sync-upstream-action.git
+      
+      - name: Sync repositories
+        run: uv run sync-upstream --token "${{ secrets.GITHUB_TOKEN }}" --owner "YOUR_GITHUB_USERNAME"
+```
+
+**注意**：请将 `YOUR_GITHUB_USERNAME` 替换为您实际的 GitHub 用户名，您可能需要创建一个具有 `repo` 权限的个人访问令牌，并将其作为密钥存储在您的仓库中。
 
 ### 许可证
 
