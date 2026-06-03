@@ -284,6 +284,38 @@ jobs:
 
 **注意**：请将 `YOUR_GITHUB_USERNAME` 替换为您实际的 GitHub 用户名，您可能需要创建一个具有 `repo` 权限的个人访问令牌，并将其作为密钥存储在您的仓库中。
 
+## 🔒 安全建议
+
+### GitHub Actions 中使用 Secrets
+
+永远不要将 token 明文提交到仓库中。使用 GitHub Secrets 安全存储：
+
+1. 进入仓库 → **Settings** → **Secrets and variables** → **Actions**
+2. 点击 **New repository secret**
+3. 名称：`SYNC_UPSTREAM_TOKEN`
+4. 值：您的 GitHub Personal Access Token
+5. 在工作流中使用：`${{ secrets.SYNC_UPSTREAM_TOKEN }}`
+
+### 本地使用安全配置
+
+1. **使用环境变量**（推荐）：
+   ```bash
+   # 在 ~/.bashrc 或 ~/.zshrc 中添加
+   export GITHUB_TOKEN="your_token_here"
+   ```
+
+2. **使用 .gitignore**：
+   ```
+   # .gitignore
+   config.yaml
+   *.env
+   ```
+
+3. **最小权限原则**：
+   - 使用 Fine-grained tokens 代替 Classic tokens
+   - 只授予必要的权限（Contents + Workflows）
+   - 设置合理的过期时间
+
 ### 许可证
 
 本项目采用 Apache License 2.0 许可证 - 有关详细信息，请参阅 [LICENSE](LICENSE) 文件。
