@@ -16,18 +16,29 @@ Sync your forked GitHub repositories with their upstream repositories.
 
 ### Installation with uv
 
-#### Option 1: Install as a tool (recommended for regular use)
+#### Option 1: Just install dependencies and run (simplest)
+```bash
+# Clone the repository
+git clone https://github.com/yikf/sync-upstream-action.git
+cd sync-upstream-action
+
+# Install dependencies
+uv sync
+
+# Run the script
+uv run python run_sync.py --owner "Yikf"
+```
+
+#### Option 2: Install as a tool (if you want to use it from anywhere)
 ```bash
 # Install directly from GitHub
 uv pip install git+https://github.com/yikf/sync-upstream-action.git
 
-# Or clone and install
-git clone https://github.com/yikf/sync-upstream-action.git
-cd sync-upstream-action
-uv pip install .
+# Then you can run it from anywhere
+uv run sync-upstream --owner "Yikf"
 ```
 
-#### Option 2: Editable install (for development)
+#### Option 3: Editable install (for development)
 ```bash
 git clone https://github.com/yikf/sync-upstream-action.git
 cd sync-upstream-action
@@ -40,21 +51,15 @@ uv pip install -e .
 # Set GitHub token
 export GITHUB_TOKEN="your_personal_access_token"
 
-# Auto scan and sync all forked repositories
+# If you installed as a tool
 uv run sync-upstream --owner "Yikf"
-
-# Or use a config file
+# Or with config file
 uv run sync-upstream --config config.yaml
-```
 
-### Run without installation
-
-You can also run the script directly without installing:
-```bash
-git clone https://github.com/yikf/sync-upstream-action.git
-cd sync-upstream-action
-uv pip install -r <(uv pip compile pyproject.toml)
+# If you just installed dependencies
 uv run python run_sync.py --owner "Yikf"
+# Or with config file
+uv run python run_sync.py --config config.yaml
 ```
 
 ### Configuration File
@@ -141,18 +146,29 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 
 ### 使用 uv 安装
 
-#### 选项 1：作为工具安装（推荐日常使用）
+#### 选项 1：仅安装依赖并运行（最简单）
+```bash
+# 克隆仓库
+git clone https://github.com/yikf/sync-upstream-action.git
+cd sync-upstream-action
+
+# 安装依赖
+uv sync
+
+# 运行脚本
+uv run python run_sync.py --owner "Yikf"
+```
+
+#### 选项 2：作为工具安装（如果想在任何地方使用）
 ```bash
 # 直接从 GitHub 安装
 uv pip install git+https://github.com/yikf/sync-upstream-action.git
 
-# 或者克隆后安装
-git clone https://github.com/yikf/sync-upstream-action.git
-cd sync-upstream-action
-uv pip install .
+# 然后可以在任何地方运行
+uv run sync-upstream --owner "Yikf"
 ```
 
-#### 选项 2：可编辑模式安装（用于开发）
+#### 选项 3：可编辑模式安装（用于开发）
 ```bash
 git clone https://github.com/yikf/sync-upstream-action.git
 cd sync-upstream-action
@@ -165,21 +181,15 @@ uv pip install -e .
 # 设置 GitHub 令牌
 export GITHUB_TOKEN="your_personal_access_token"
 
-# 自动扫描并同步所有复刻仓库
+# 如果作为工具安装
 uv run sync-upstream --owner "Yikf"
-
 # 或者使用配置文件
 uv run sync-upstream --config config.yaml
-```
 
-### 不安装直接运行
-
-您也可以不安装直接运行脚本：
-```bash
-git clone https://github.com/yikf/sync-upstream-action.git
-cd sync-upstream-action
-uv pip install -r <(uv pip compile pyproject.toml)
+# 如果仅安装了依赖
 uv run python run_sync.py --owner "Yikf"
+# 或者使用配置文件
+uv run python run_sync.py --config config.yaml
 ```
 
 ### 配置文件
