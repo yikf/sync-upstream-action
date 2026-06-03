@@ -2,11 +2,19 @@
 import argparse
 import sys
 import os
+import logging
 from .config import ConfigLoader
 from .github_api import GitHubAPI
 from .scanner import RepositoryScanner
 from .sync import Synchronizer
 from .models import Repository
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 
 def main():
@@ -18,15 +26,14 @@ def main():
     parser.add_argument("--branch", "-b", help="Single branch name (legacy mode)")
     
     args = parser.parse_args()
+    logger.info("Starting sync-upstream")
 
     # Check if running in legacy single repo mode
     if args.repo and args.owner and args.token:
-        from .sync import Synchronizer
-        from .github_api import GitHubAPI
+        logger.info(f"Running in legacy single repo mode: {args.owner}/{args.repo}")
         github_api = GitHubAPI(args.token)
         branch = args.branch if args.branch else "master"
         
-        from .models import Repository
         repo_data = github_api.get_repository(args.owner, args.repo)
         if repo_data:
             repo = Repository(
@@ -39,19 +46,22 @@ def main():
             if "parent" in repo_data:
                 repo.has_upstream = True
                 repo.upstream = repo_data["parent"]["full_name"]
+                logger.info(f"Upstream found: {repo.upstream}")
             
             sync = Synchronizer(github_api)
             success = sync.sync_repository(repo, [branch])
             sys.exit(0 if success else 1)
         else:
-            print(f"Repository {args.owner}/{args.repo} not found")
+            logger.error(f"Repository {args.owner}/{args.repo} not found")
             sys.exit(1)
 
     # Load configuration
     try:
         if args.config:
+            logger.info(f"Loading configuration from file: {args.config}")
             config = ConfigLoader.load_from_file(args.config)
         else:
+            logger.info("Loading configuration from environment variables")
             config = ConfigLoader.load_from_env()
         
         if args.token:
@@ -60,15 +70,16 @@ def main():
             config.owner = args.owner
         
         if not config.github_token:
-            print("Error: GitHub token is required. Set via --token, config file, or GITHUB_TOKEN environment variable.")
+            logger.error("GitHub token is required. Set via --token, config file, or GITHUB_TOKEN environment variable.")
             parser.print_help()
             sys.exit(1)
 
     except Exception as e:
-        print(f"Error loading configuration: {e}")
+        logger.error(f"Error loading configuration: {e}", exc_info=True)
         sys.exit(1)
 
     # Initialize components
+    logger.info("Initializing components")
     github_api = GitHubAPI(config.github_token)
     scanner = RepositoryScanner(config, github_api)
     synchronizer = Synchronizer(github_api)
@@ -77,25 +88,32 @@ def main():
     try:
         repos = scanner.scan()
     except Exception as e:
-        print(f"Error scanning repositories: {e}")
+        logger.error(f"Error scanning repositories: {e}", exc_info=True)
         sys.exit(1)
 
     if not repos:
-        print("No repositories to sync")
+        logger.info("No repositories to sync")
         sys.exit(0)
 
     # Sync repositories
+    logger.info(f"Starting sync for {len(repos)} repositories")
     repo_configs = config.repositories.get("included", [])
     results = synchronizer.sync_repositories(repos, repo_configs)
 
     # Print results
-    print("\n" + "=" * 50)
-    print(f"Sync complete: {results['success']} succeeded, {results['failed']} failed")
-    print("=" * 50)
+    logger.info("\n" + "=" * 50)
+    logger.info(f"Sync complete: {results['success']} succeeded, {results['failed']} failed")
+    logger.info("=" * 50)
 
     for detail in results["details"]:
         status = "✓" if detail["success"] else "✗"
-        print(f"{status} {detail['repo']}")
+        if detail["success"]:
+            logger.info(f"{status} {detail['repo']}")
+        else:
+            error_msg = f"{status} {detail['repo']}"
+            if "error" in detail:
+                error_msg += f" - {detail['error']}"
+            logger.error(error_msg)
 
     sys.exit(0 if results["failed"] == 0 else 1)
 
