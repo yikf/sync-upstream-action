@@ -9,11 +9,34 @@ from .scanner import RepositoryScanner
 from .sync import Synchronizer
 from .models import Repository
 
+
+class EmojiLogFormatter(logging.Formatter):
+    """自定义日志格式化器，添加友好的图标"""
+    LEVEL_EMOJIS = {
+        logging.DEBUG: "🔍",
+        logging.INFO: "ℹ️",
+        logging.WARNING: "⚠️",
+        logging.ERROR: "❌",
+        logging.CRITICAL: "🔥"
+    }
+
+    def format(self, record):
+        emoji = self.LEVEL_EMOJIS.get(record.levelno, "")
+        record.emoji = emoji
+        return super().format(record)
+
+
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+handler = logging.StreamHandler()
+formatter = EmojiLogFormatter(
+    '%(asctime)s - %(name)s - %(emoji)s %(levelname)s - %(message)s'
 )
+handler.setFormatter(formatter)
+
+root_logger = logging.getLogger()
+root_logger.addHandler(handler)
+root_logger.setLevel(logging.INFO)
+
 logger = logging.getLogger(__name__)
 
 
