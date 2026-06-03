@@ -16,12 +16,21 @@ Sync your forked GitHub repositories with their upstream repositories.
 
 ### Installation with uv
 
+#### Option 1: Install as a tool (recommended for regular use)
 ```bash
-# Clone the repository
+# Install directly from GitHub
+uv pip install git+https://github.com/yikf/sync-upstream-action.git
+
+# Or clone and install
 git clone https://github.com/yikf/sync-upstream-action.git
 cd sync-upstream-action
+uv pip install .
+```
 
-# Install dependencies with uv
+#### Option 2: Editable install (for development)
+```bash
+git clone https://github.com/yikf/sync-upstream-action.git
+cd sync-upstream-action
 uv pip install -e .
 ```
 
@@ -36,6 +45,16 @@ uv run sync-upstream --owner "Yikf"
 
 # Or use a config file
 uv run sync-upstream --config config.yaml
+```
+
+### Run without installation
+
+You can also run the script directly without installing:
+```bash
+git clone https://github.com/yikf/sync-upstream-action.git
+cd sync-upstream-action
+uv pip install -r <(uv pip compile pyproject.toml)
+uv run python run_sync.py --owner "Yikf"
 ```
 
 ### Configuration File
@@ -122,12 +141,21 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 
 ### 使用 uv 安装
 
+#### 选项 1：作为工具安装（推荐日常使用）
 ```bash
-# 克隆仓库
+# 直接从 GitHub 安装
+uv pip install git+https://github.com/yikf/sync-upstream-action.git
+
+# 或者克隆后安装
 git clone https://github.com/yikf/sync-upstream-action.git
 cd sync-upstream-action
+uv pip install .
+```
 
-# 使用 uv 安装依赖
+#### 选项 2：可编辑模式安装（用于开发）
+```bash
+git clone https://github.com/yikf/sync-upstream-action.git
+cd sync-upstream-action
 uv pip install -e .
 ```
 
@@ -142,6 +170,16 @@ uv run sync-upstream --owner "Yikf"
 
 # 或者使用配置文件
 uv run sync-upstream --config config.yaml
+```
+
+### 不安装直接运行
+
+您也可以不安装直接运行脚本：
+```bash
+git clone https://github.com/yikf/sync-upstream-action.git
+cd sync-upstream-action
+uv pip install -r <(uv pip compile pyproject.toml)
+uv run python run_sync.py --owner "Yikf"
 ```
 
 ### 配置文件
