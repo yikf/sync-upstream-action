@@ -102,6 +102,7 @@ https://github.com/settings/tokens
 - Permissions:
   - **Repository permissions**:
     - `Contents`: Read and write (required to sync branches)
+    - `Workflows`: Read and write (required to sync workflow files)
     - `Metadata`: Read-only (automatically included)
 
 **Note**: If you need to sync private repositories, make sure the token has access to them.
@@ -244,6 +245,7 @@ https://github.com/settings/tokens
 - 权限设置：
   - **仓库权限**：
     - `Contents`：读取和写入（同步分支必需）
+    - `Workflows`：读取和写入（同步工作流文件必需）
     - `Metadata`：只读（自动包含）
 
 **注意**：如果需要同步私有仓库，请确保令牌有权访问这些仓库。

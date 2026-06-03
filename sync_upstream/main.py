@@ -14,7 +14,7 @@ class EmojiLogFormatter(logging.Formatter):
     """自定义日志格式化器，添加友好的图标"""
     LEVEL_EMOJIS = {
         logging.DEBUG: "🔍",
-        logging.INFO: "ℹ️",
+        logging.INFO: "✅",
         logging.WARNING: "⚠️",
         logging.ERROR: "❌",
         logging.CRITICAL: "🔥"
@@ -29,13 +29,17 @@ class EmojiLogFormatter(logging.Formatter):
 # Configure logging
 handler = logging.StreamHandler()
 formatter = EmojiLogFormatter(
-    '%(asctime)s - %(name)s - %(emoji)s %(levelname)s - %(message)s'
+    '%(emoji)s %(message)s'
 )
 handler.setFormatter(formatter)
 
 root_logger = logging.getLogger()
 root_logger.addHandler(handler)
 root_logger.setLevel(logging.INFO)
+
+# 减少其他模块的日志噪声
+for logger_name in ['urllib3', 'requests']:
+    logging.getLogger(logger_name).setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +51,12 @@ def main():
     parser.add_argument("--owner", "-o", help="Repository owner")
     
     args = parser.parse_args()
-    logger.info("Starting sync-upstream")
+    
+    print("")
+    print("╔══════════════════════════════════════════════════════════════╗")
+    print("║                    🔄 Sync Upstream Tool                     ║")
+    print("╚══════════════════════════════════════════════════════════════╝")
+    print("")
 
     # Load configuration
     try:
@@ -73,11 +82,10 @@ def main():
             sys.exit(1)
 
     except Exception as e:
-        logger.error(f"Error loading configuration: {e}", exc_info=True)
+        logger.error(f"Error loading configuration: {e}")
         sys.exit(1)
 
     # Initialize components
-    logger.info("Initializing components")
     github_api = GitHubAPI(config.github_token)
     scanner = RepositoryScanner(config, github_api)
     synchronizer = Synchronizer(github_api)
@@ -86,7 +94,7 @@ def main():
     try:
         repos = scanner.scan()
     except Exception as e:
-        logger.error(f"Error scanning repositories: {e}", exc_info=True)
+        logger.error(f"Error scanning repositories: {e}")
         sys.exit(1)
 
     if not repos:
@@ -99,19 +107,23 @@ def main():
     results = synchronizer.sync_repositories(repos, repo_configs)
 
     # Print results
-    logger.info("\n" + "=" * 50)
-    logger.info(f"Sync complete: {results['success']} succeeded, {results['failed']} failed")
-    logger.info("=" * 50)
+    print("")
+    print("╔══════════════════════════════════════════════════════════════╗")
+    print(f"║  Sync complete: {results['success']:2d} succeeded, {results['failed']:2d} failed  ║")
+    print("╚══════════════════════════════════════════════════════════════╝")
+    print("")
 
     for detail in results["details"]:
-        status = "✓" if detail["success"] else "✗"
+        status = "✅" if detail["success"] else "❌"
         if detail["success"]:
-            logger.info(f"{status} {detail['repo']}")
+            print(f"  {status} {detail['repo']}")
         else:
-            error_msg = f"{status} {detail['repo']}"
+            error_msg = f"  {status} {detail['repo']}"
             if "error" in detail:
                 error_msg += f" - {detail['error']}"
-            logger.error(error_msg)
+            print(error_msg)
+    
+    print("")
 
     sys.exit(0 if results["failed"] == 0 else 1)
 
