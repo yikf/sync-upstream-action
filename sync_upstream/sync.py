@@ -1,21 +1,29 @@
 import logging
 from typing import List, Optional
 from .github_api import GitHubAPI
-from .models import Repository, RepositoryConfig
+from .git_sync import GitSync
+from .models import Repository, RepositoryConfig, SyncConfig
 
 logger = logging.getLogger(__name__)
 
 
 class Synchronizer:
-    def __init__(self, github_api: GitHubAPI):
+    def __init__(self, github_api: GitHubAPI, sync_config: SyncConfig):
         self.github_api = github_api
+        self.sync_config = sync_config
 
-    def sync_repository(self, repo: Repository, branches: Optional[List[str]] = None) -> bool:
+    def sync_repository(self, repo: Repository, repo_config: Optional[RepositoryConfig] = None) -> bool:
         if not repo.has_upstream:
             logger.warning(f"Skipping {repo.full_name}: no upstream repository")
             return False
 
         logger.info(f"Syncing {repo.full_name} with upstream {repo.upstream}")
+
+        branches = None
+        local_path = None
+        if repo_config:
+            branches = repo_config.branches if repo_config.branches else None
+            local_path = repo_config.local_path
 
         if not branches:
             logger.debug(f"Fetching all branches for {repo.full_name}")
@@ -23,14 +31,20 @@ class Synchronizer:
 
         success_count = 0
         for branch in branches:
-            if self.github_api.sync_branch(repo.owner, repo.name, branch):
-                success_count += 1
+            if self.sync_config.method == "git" and local_path:
+                # Use git command sync
+                if GitSync.sync_repository(local_path, branch):
+                    success_count += 1
+            else:
+                # Use GitHub API sync (default)
+                if self.github_api.sync_branch(repo.owner, repo.name, branch):
+                    success_count += 1
 
         logger.info(f"Synced {success_count}/{len(branches)} branches for {repo.full_name}")
         return success_count > 0
 
     def sync_repositories(self, repos: List[Repository], repo_configs: Optional[List[RepositoryConfig]] = None) -> dict:
-        logger.info(f"Starting sync for {len(repos)} repositories")
+        logger.info(f"Starting sync for {len(repos)} repositories using method: {self.sync_config.method}")
         results = {
             "total": len(repos),
             "success": 0,
@@ -45,12 +59,9 @@ class Synchronizer:
 
         for repo in repos:
             repo_config = config_map.get(repo.name)
-            branches = None
-            if repo_config:
-                branches = repo_config.branches if repo_config.branches else None
             
             try:
-                success = self.sync_repository(repo, branches)
+                success = self.sync_repository(repo, repo_config)
                 if success:
                     results["success"] += 1
                 else:

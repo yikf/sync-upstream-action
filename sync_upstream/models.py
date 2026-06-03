@@ -6,6 +6,7 @@ from typing import List, Optional
 class RepositoryConfig:
     name: str
     branches: List[str] = field(default_factory=list)
+    local_path: Optional[str] = None
 
 
 @dataclass

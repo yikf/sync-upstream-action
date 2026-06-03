@@ -50,7 +50,8 @@ class ConfigLoader:
             else:
                 included_repos.append(RepositoryConfig(
                     name=repo_data.get("name"),
-                    branches=repo_data.get("branches", [])
+                    branches=repo_data.get("branches", []),
+                    local_path=repo_data.get("local_path")
                 ))
 
         excluded_repos = repositories.get("excluded", [])

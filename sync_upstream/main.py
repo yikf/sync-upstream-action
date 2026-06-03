@@ -71,8 +71,12 @@ def main():
                 repo.upstream = repo_data["parent"]["full_name"]
                 logger.info(f"Upstream found: {repo.upstream}")
             
-            sync = Synchronizer(github_api)
-            success = sync.sync_repository(repo, [branch])
+            from .models import SyncConfig
+            sync_config = SyncConfig()
+            sync = Synchronizer(github_api, sync_config)
+            from .models import RepositoryConfig
+            repo_config = RepositoryConfig(name=repo.name, branches=[branch])
+            success = sync.sync_repository(repo, repo_config)
             sys.exit(0 if success else 1)
         else:
             logger.error(f"Repository {args.owner}/{args.repo} not found")
@@ -105,7 +109,7 @@ def main():
     logger.info("Initializing components")
     github_api = GitHubAPI(config.github_token)
     scanner = RepositoryScanner(config, github_api)
-    synchronizer = Synchronizer(github_api)
+    synchronizer = Synchronizer(github_api, config.sync)
 
     # Scan repositories
     try:

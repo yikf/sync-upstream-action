@@ -91,8 +91,20 @@ sync:
 
 ### Personal Access Token
 
-Create a GitHub Personal Access Token (PAT) with the `repo` scope at:
+Create a GitHub Personal Access Token (PAT) at:
 https://github.com/settings/tokens
+
+#### Classic Token (旧版)
+- Select `repo` scope (full control of private repositories)
+
+#### Fine-grained Token (新版细粒度 - 推荐)
+- Repository access: `All repositories` or select specific repositories you want to sync
+- Permissions:
+  - **Repository permissions**:
+    - `Contents`: Read and write (required to sync branches)
+    - `Metadata`: Read-only (automatically included)
+
+**Note**: If you need to sync private repositories, make sure the token has access to them.
 
 ### GitHub Actions Schedule
 
@@ -221,8 +233,20 @@ sync:
 
 ### 个人访问令牌
 
-在以下地址创建具有 `repo` 权限的 GitHub 个人访问令牌（PAT）：
+在以下地址创建 GitHub 个人访问令牌（PAT）：
 https://github.com/settings/tokens
+
+#### Classic Token (旧版)
+- 选择 `repo` 权限范围（完全控制私有仓库）
+
+#### Fine-grained Token (新版细粒度 - 推荐)
+- 仓库访问权限：`All repositories` 或选择您要同步的特定仓库
+- 权限设置：
+  - **仓库权限**：
+    - `Contents`：读取和写入（同步分支必需）
+    - `Metadata`：只读（自动包含）
+
+**注意**：如果需要同步私有仓库，请确保令牌有权访问这些仓库。
 
 ### GitHub Actions 定时任务
 
