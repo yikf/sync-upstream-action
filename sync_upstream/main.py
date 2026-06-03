@@ -11,7 +11,7 @@ from .models import Repository
 
 
 class EmojiLogFormatter(logging.Formatter):
-    """自定义日志格式化器，添加友好的图标"""
+    """Custom log formatter with friendly emojis"""
     LEVEL_EMOJIS = {
         logging.DEBUG: "🔍",
         logging.INFO: "✅",
@@ -37,7 +37,7 @@ root_logger = logging.getLogger()
 root_logger.addHandler(handler)
 root_logger.setLevel(logging.INFO)
 
-# 减少其他模块的日志噪声
+# Reduce log noise from other modules
 for logger_name in ['urllib3', 'requests']:
     logging.getLogger(logger_name).setLevel(logging.WARNING)
 

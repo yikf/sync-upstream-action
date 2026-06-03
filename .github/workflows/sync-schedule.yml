@@ -1,7 +1,7 @@
 on:
   schedule:
     - cron: "0 2 * * *" # every day at 10:00 (UTC+8 = 2:00 UTC)
-  workflow_dispatch: # 允许手动触发
+  workflow_dispatch: # allow manual triggering
 name: Schedule / sync-upstream of Yikf's forked repositories
 jobs:
   run:

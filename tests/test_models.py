@@ -1,12 +1,6 @@
 """Tests for models module"""
 import pytest
-from sync_upstream.models import (
-    Repository,
-    RepositoryConfig,
-    AutoScanConfig,
-    SyncConfig,
-    AppConfig,
-)
+from sync_upstream.models import Repository, RepositoryConfig, AppConfig
 
 
 def test_repository_config():
@@ -23,41 +17,28 @@ def test_repository_config_default_branches():
     assert config.branches == []
 
 
-def test_auto_scan_config():
-    """Test AutoScanConfig initialization"""
-    config = AutoScanConfig(enabled=True, include_private=True)
-    assert config.enabled is True
-    assert config.include_private is True
-
-
-def test_auto_scan_config_defaults():
-    """Test AutoScanConfig default values"""
-    config = AutoScanConfig()
-    assert config.enabled is True
-    assert config.include_private is False
-
-
-def test_sync_config():
-    """Test SyncConfig initialization"""
-    config = SyncConfig(method="git", timeout=600)
-    assert config.method == "git"
-    assert config.timeout == 600
-
-
-def test_sync_config_defaults():
-    """Test SyncConfig default values"""
-    config = SyncConfig()
-    assert config.method == "api"
-    assert config.timeout == 300
-
-
 def test_app_config():
     """Test AppConfig initialization"""
     app_config = AppConfig(github_token="test-token")
     assert app_config.github_token == "test-token"
     assert app_config.owner is None
-    assert app_config.auto_scan.enabled is True
-    assert app_config.sync.method == "api"
+    assert app_config.repositories == []
+
+
+def test_app_config_with_repositories():
+    """Test AppConfig with repositories"""
+    repo1 = RepositoryConfig(name="repo1", branches=["main"])
+    repo2 = RepositoryConfig(name="repo2")
+    app_config = AppConfig(
+        github_token="test-token",
+        owner="test-owner",
+        repositories=[repo1, repo2]
+    )
+    assert app_config.github_token == "test-token"
+    assert app_config.owner == "test-owner"
+    assert len(app_config.repositories) == 2
+    assert app_config.repositories[0].name == "repo1"
+    assert app_config.repositories[1].name == "repo2"
 
 
 def test_repository_model():

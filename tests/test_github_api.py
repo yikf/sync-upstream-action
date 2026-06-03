@@ -1,7 +1,6 @@
 """Tests for github_api module"""
 import pytest
 from sync_upstream.github_api import GitHubAPI
-from sync_upstream.models import Repository
 
 
 def test_github_api_init():
@@ -77,115 +76,6 @@ def test_github_api_get_current_user(mocker):
     user = api.get_current_user()
     
     assert user["login"] == "test-user"
-
-
-def test_github_api_get_user_forks(mocker):
-    """Test getting user forks"""
-    mock_response1 = mocker.Mock()
-    mock_response1.status_code = 200
-    mock_response1.json.return_value = [
-        {
-            "fork": True,
-            "owner": {"login": "test-user"},
-            "name": "fork1",
-            "full_name": "test-user/fork1",
-            "private": False,
-            "default_branch": "main",
-            "parent": {"full_name": "upstream/fork1"}
-        },
-        {
-            "fork": True,
-            "owner": {"login": "test-user"}, 
-            "name": "private-fork",
-            "full_name": "test-user/private-fork",
-            "private": True,
-            "default_branch": "main"
-        }
-    ]
-    
-    mock_response2 = mocker.Mock()
-    mock_response2.status_code = 200
-    mock_response2.json.return_value = []
-    
-    mocker.patch("requests.get", side_effect=[mock_response1, mock_response2])
-    
-    api = GitHubAPI("test-token")
-    repos = api.get_user_forks("test-user")
-    
-    assert len(repos) == 1
-    assert repos[0].name == "fork1"
-    assert repos[0].has_upstream is True
-
-
-def test_github_api_get_user_forks_include_private(mocker):
-    """Test getting user forks including private"""
-    mock_response1 = mocker.Mock()
-    mock_response1.status_code = 200
-    mock_response1.json.return_value = [
-        {
-            "fork": True,
-            "owner": {"login": "test-user"},
-            "name": "public-fork",
-            "full_name": "test-user/public-fork",
-            "private": False,
-            "default_branch": "main"
-        },
-        {
-            "fork": True,
-            "owner": {"login": "test-user"}, 
-            "name": "private-fork",
-            "full_name": "test-user/private-fork",
-            "private": True,
-            "default_branch": "main"
-        }
-    ]
-    
-    mock_response2 = mocker.Mock()
-    mock_response2.status_code = 200
-    mock_response2.json.return_value = []
-    
-    mocker.patch("requests.get", side_effect=[mock_response1, mock_response2])
-    
-    api = GitHubAPI("test-token")
-    repos = api.get_user_forks("test-user", include_private=True)
-    
-    assert len(repos) == 2
-
-
-def test_github_api_get_user_forks_ignore_non_fork(mocker):
-    """Test that non-fork repos are ignored"""
-    mock_response1 = mocker.Mock()
-    mock_response1.status_code = 200
-    mock_response1.json.return_value = [
-        {
-            "fork": False,  # Not a fork
-            "owner": {"login": "test-user"},
-            "name": "not-a-fork",
-            "full_name": "test-user/not-a-fork",
-            "private": False,
-            "default_branch": "main"
-        },
-        {
-            "fork": True,
-            "owner": {"login": "test-user"},
-            "name": "actual-fork",
-            "full_name": "test-user/actual-fork",
-            "private": False,
-            "default_branch": "main"
-        }
-    ]
-    
-    mock_response2 = mocker.Mock()
-    mock_response2.status_code = 200
-    mock_response2.json.return_value = []
-    
-    mocker.patch("requests.get", side_effect=[mock_response1, mock_response2])
-    
-    api = GitHubAPI("test-token")
-    repos = api.get_user_forks("test-user")
-    
-    assert len(repos) == 1
-    assert repos[0].name == "actual-fork"
 
 
 def test_github_api_get_repository_branches(mocker):

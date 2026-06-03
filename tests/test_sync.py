@@ -1,7 +1,7 @@
 """Tests for sync module"""
 import pytest
 from sync_upstream.sync import Synchronizer
-from sync_upstream.models import Repository
+from sync_upstream.models import Repository, RepositoryConfig
 
 
 def test_synchronizer_init(mocker):
@@ -29,10 +29,9 @@ def test_sync_repository_no_upstream(mocker):
     mock_github_api.sync_branch.assert_not_called()
 
 
-def test_sync_repository_success(mocker):
-    """Test successful repository sync"""
+def test_sync_repository_success_default_branch(mocker):
+    """Test successful repository sync with default branch only"""
     mock_github_api = mocker.Mock()
-    mock_github_api.get_repository_branches.return_value = ["main", "dev"]
     mock_github_api.sync_branch.return_value = True
     
     sync = Synchronizer(mock_github_api)
@@ -44,15 +43,16 @@ def test_sync_repository_success(mocker):
         is_private=False,
         has_upstream=True,
         upstream="upstream/repo",
+        default_branch="main"
     )
     
     result = sync.sync_repository(repo)
     assert result is True
-    assert mock_github_api.sync_branch.call_count == 2
+    mock_github_api.sync_branch.assert_called_once_with("owner", "repo", "main")
 
 
-def test_sync_repository_with_branches(mocker):
-    """Test syncing repository with specified branches"""
+def test_sync_repository_with_specified_branches(mocker):
+    """Test syncing repository with specified branches via config"""
     mock_github_api = mocker.Mock()
     mock_github_api.sync_branch.return_value = True
     
@@ -65,12 +65,16 @@ def test_sync_repository_with_branches(mocker):
         is_private=False,
         has_upstream=True,
         upstream="upstream/repo",
+        default_branch="main"
     )
     
-    result = sync.sync_repository(repo, ["main"])
+    repo_config = RepositoryConfig(name="repo", branches=["main", "dev"])
+    
+    result = sync.sync_repository(repo, repo_config)
     assert result is True
-    mock_github_api.get_repository_branches.assert_not_called()
-    mock_github_api.sync_branch.assert_called_once_with("owner", "repo", "main")
+    assert mock_github_api.sync_branch.call_count == 2
+    mock_github_api.sync_branch.assert_any_call("owner", "repo", "main")
+    mock_github_api.sync_branch.assert_any_call("owner", "repo", "dev")
 
 
 def test_sync_repositories_empty(mocker):
@@ -87,7 +91,6 @@ def test_sync_repositories_empty(mocker):
 def test_sync_repositories_multiple(mocker):
     """Test syncing multiple repositories"""
     mock_github_api = mocker.Mock()
-    mock_github_api.get_repository_branches.return_value = ["main"]
     mock_github_api.sync_branch.side_effect = [True, False]
     
     sync = Synchronizer(mock_github_api)
@@ -120,10 +123,50 @@ def test_sync_repositories_multiple(mocker):
     assert len(results["details"]) == 2
 
 
+def test_sync_repositories_with_configs(mocker):
+    """Test syncing multiple repositories with configs"""
+    mock_github_api = mocker.Mock()
+    mock_github_api.sync_branch.side_effect = [True, True, True]
+    
+    sync = Synchronizer(mock_github_api)
+    
+    repos = [
+        Repository(
+            owner="owner",
+            name="repo1",
+            full_name="owner/repo1",
+            is_private=False,
+            has_upstream=True,
+            upstream="upstream/repo1",
+            default_branch="main"
+        ),
+        Repository(
+            owner="owner",
+            name="repo2",
+            full_name="owner/repo2",
+            is_private=False,
+            has_upstream=True,
+            upstream="upstream/repo2",
+            default_branch="main"
+        ),
+    ]
+    
+    repo_configs = [
+        RepositoryConfig(name="repo1", branches=["main", "dev"]),
+        RepositoryConfig(name="repo2", branches=["main"])
+    ]
+    
+    results = sync.sync_repositories(repos, repo_configs)
+    assert results["total"] == 2
+    assert results["success"] == 2
+    assert results["failed"] == 0
+    assert mock_github_api.sync_branch.call_count == 3  # 2 + 1
+
+
 def test_sync_repositories_exception(mocker):
     """Test syncing with exception"""
     mock_github_api = mocker.Mock()
-    mock_github_api.get_repository_branches.side_effect = Exception("API Error")
+    mock_github_api.sync_branch.side_effect = Exception("API Error")
     
     sync = Synchronizer(mock_github_api)
     
@@ -134,6 +177,7 @@ def test_sync_repositories_exception(mocker):
         is_private=False,
         has_upstream=True,
         upstream="upstream/repo",
+        default_branch="main"
     )
     
     results = sync.sync_repositories([repo])

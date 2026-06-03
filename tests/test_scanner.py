@@ -13,45 +13,13 @@ def test_scanner_init(mocker):
     assert scanner.github_api is mock_github_api
 
 
-def test_scan_auto_scan_enabled(mocker):
-    """Test scanning with auto_scan enabled"""
-    mock_config = mocker.Mock()
-    mock_config.auto_scan.enabled = True
-    mock_config.auto_scan.include_private = False
-    mock_config.owner = "test-owner"
-    mock_config.repositories = {"included": [], "excluded": []}
-    
-    mock_github_api = mocker.Mock()
-    mock_repo = Repository(
-        owner="test-owner",
-        name="test-repo",
-        full_name="test-owner/test-repo",
-        is_private=False,
-        has_upstream=True,
-        upstream="upstream/repo",
-        default_branch="main"
-    )
-    mock_github_api.get_user_forks.return_value = [mock_repo]
-    
-    scanner = RepositoryScanner(mock_config, mock_github_api)
-    repos = scanner.scan()
-    
-    assert len(repos) == 1
-    assert repos[0].name == "test-repo"
-    mock_github_api.get_user_forks.assert_called_once_with("test-owner", include_private=False)
-
-
 def test_scan_get_current_user(mocker):
     """Test scanning when owner is None - should get from API"""
-    mock_config = mocker.Mock()
-    mock_config.auto_scan.enabled = True
-    mock_config.auto_scan.include_private = False
+    mock_config = AppConfig(github_token="test", repositories=[])
     mock_config.owner = None
-    mock_config.repositories = {"included": [], "excluded": []}
     
     mock_github_api = mocker.Mock()
     mock_github_api.get_current_user.return_value = {"login": "api-owner"}
-    mock_github_api.get_user_forks.return_value = []
     
     scanner = RepositoryScanner(mock_config, mock_github_api)
     scanner.scan()
@@ -60,13 +28,14 @@ def test_scan_get_current_user(mocker):
     assert mock_config.owner == "api-owner"
 
 
-def test_scan_with_included_repos(mocker):
-    """Test scanning with included repos"""
-    mock_config = mocker.Mock()
-    mock_config.auto_scan.enabled = False
-    mock_config.owner = "test-owner"
+def test_scan_with_configured_repos(mocker):
+    """Test scanning with configured repos"""
     repo_config = RepositoryConfig(name="included-repo", branches=[])
-    mock_config.repositories = {"included": [repo_config], "excluded": []}
+    mock_config = AppConfig(
+        github_token="test",
+        owner="test-owner",
+        repositories=[repo_config]
+    )
     
     mock_github_api = mocker.Mock()
     repo_data = {
@@ -86,72 +55,40 @@ def test_scan_with_included_repos(mocker):
     assert repos[0].name == "included-repo"
 
 
-def test_scan_with_excluded_repos(mocker):
-    """Test scanning with excluded repos"""
-    mock_config = mocker.Mock()
-    mock_config.auto_scan.enabled = True
-    mock_config.auto_scan.include_private = False
-    mock_config.owner = "test-owner"
-    mock_config.repositories = {"included": [], "excluded": ["excluded-repo"]}
-    
-    mock_github_api = mocker.Mock()
-    
-    # Create one repo that will be excluded and one that will remain
-    excluded_repo = Repository(
-        owner="test-owner",
-        name="excluded-repo",
-        full_name="test-owner/excluded-repo",
-        is_private=False,
-        has_upstream=True,
-        upstream="upstream/repo",
-        default_branch="main"
-    )
-    kept_repo = Repository(
-        owner="test-owner",
-        name="kept-repo",
-        full_name="test-owner/kept-repo",
-        is_private=False,
-        has_upstream=True,
-        upstream="upstream/repo2",
-        default_branch="main"
-    )
-    mock_github_api.get_user_forks.return_value = [excluded_repo, kept_repo]
-    
-    scanner = RepositoryScanner(mock_config, mock_github_api)
-    repos = scanner.scan()
-    
-    assert len(repos) == 1
-    assert repos[0].name == "kept-repo"
-
-
 def test_scan_no_upstream_repos_excluded(mocker):
     """Test that repos without upstream are filtered out"""
-    mock_config = mocker.Mock()
-    mock_config.auto_scan.enabled = True
-    mock_config.auto_scan.include_private = False
-    mock_config.owner = "test-owner"
-    mock_config.repositories = {"included": [], "excluded": []}
+    repo_config1 = RepositoryConfig(name="no-upstream", branches=[])
+    repo_config2 = RepositoryConfig(name="with-upstream", branches=[])
+    mock_config = AppConfig(
+        github_token="test",
+        owner="test-owner",
+        repositories=[repo_config1, repo_config2]
+    )
     
     mock_github_api = mocker.Mock()
     
-    repo_without_upstream = Repository(
-        owner="test-owner",
-        name="no-upstream",
-        full_name="test-owner/no-upstream",
-        is_private=False,
-        has_upstream=False,
-        default_branch="main"
-    )
-    repo_with_upstream = Repository(
-        owner="test-owner",
-        name="with-upstream",
-        full_name="test-owner/with-upstream",
-        is_private=False,
-        has_upstream=True,
-        upstream="upstream/repo",
-        default_branch="main"
-    )
-    mock_github_api.get_user_forks.return_value = [repo_without_upstream, repo_with_upstream]
+    repo_data_without_upstream = {
+        "owner": {"login": "test-owner"},
+        "name": "no-upstream",
+        "full_name": "test-owner/no-upstream",
+        "private": False,
+        "default_branch": "main"
+        # No parent (no upstream)
+    }
+    
+    repo_data_with_upstream = {
+        "owner": {"login": "test-owner"},
+        "name": "with-upstream",
+        "full_name": "test-owner/with-upstream",
+        "private": False,
+        "default_branch": "main",
+        "parent": {"full_name": "upstream/repo"}
+    }
+    
+    mock_github_api.get_repository.side_effect = [
+        repo_data_without_upstream,
+        repo_data_with_upstream
+    ]
     
     scanner = RepositoryScanner(mock_config, mock_github_api)
     repos = scanner.scan()
@@ -160,32 +97,19 @@ def test_scan_no_upstream_repos_excluded(mocker):
     assert repos[0].name == "with-upstream"
 
 
-def test_get_branches_for_repo_config_override(mocker):
-    """Test getting branches from repo config override"""
-    mock_config = mocker.Mock()
+def test_scan_repo_not_found(mocker):
+    """Test that non-existent repos are handled gracefully"""
+    repo_config = RepositoryConfig(name="missing-repo", branches=[])
+    mock_config = AppConfig(
+        github_token="test",
+        owner="test-owner",
+        repositories=[repo_config]
+    )
+    
     mock_github_api = mocker.Mock()
+    mock_github_api.get_repository.return_value = None
     
     scanner = RepositoryScanner(mock_config, mock_github_api)
+    repos = scanner.scan()
     
-    repo = Repository(owner="owner", name="repo", full_name="owner/repo", 
-                     is_private=False, default_branch="main")
-    repo_config = RepositoryConfig(name="repo", branches=["custom-branch"])
-    
-    branches = scanner.get_branches_for_repo(repo, repo_config)
-    assert branches == ["custom-branch"]
-    mock_github_api.get_repository_branches.assert_not_called()
-
-
-def test_get_branches_for_repo_no_config(mocker):
-    """Test getting branches from API when no config"""
-    mock_config = mocker.Mock()
-    mock_github_api = mocker.Mock()
-    mock_github_api.get_repository_branches.return_value = ["api-branch-1", "api-branch-2"]
-    
-    scanner = RepositoryScanner(mock_config, mock_github_api)
-    
-    repo = Repository(owner="owner", name="repo", full_name="owner/repo", 
-                     is_private=False, default_branch="main")
-    
-    branches = scanner.get_branches_for_repo(repo)
-    assert branches == ["api-branch-1", "api-branch-2"]
+    assert len(repos) == 0
