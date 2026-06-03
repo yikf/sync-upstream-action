@@ -53,5 +53,10 @@ uv.lock
 # pytest
 .pytest_cache/
 
+# Test coverage
+.coverage
+coverage.xml
+htmlcov/
+
 # Config files with secrets
 config.*.yaml

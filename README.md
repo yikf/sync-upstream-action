@@ -51,7 +51,17 @@ uv run sync-upstream --owner "Yikf"
 ```bash
 git clone https://github.com/yikf/sync-upstream-action.git
 cd sync-upstream-action
-uv pip install -e .
+uv venv
+uv pip install -e ".[dev]"
+```
+
+### Running Tests
+```bash
+# Run all tests
+uv run pytest tests/ -v
+
+# Run tests with coverage
+uv run pytest tests/ -v --cov=sync_upstream --cov-report=term --cov-report=xml
 ```
 
 ### Usage
@@ -235,7 +245,17 @@ uv run sync-upstream --owner "Yikf"
 ```bash
 git clone https://github.com/yikf/sync-upstream-action.git
 cd sync-upstream-action
-uv pip install -e .
+uv venv
+uv pip install -e ".[dev]"
+```
+
+### 运行测试
+```bash
+# 运行所有测试
+uv run pytest tests/ -v
+
+# 运行带覆盖率的测试
+uv run pytest tests/ -v --cov=sync_upstream --cov-report=term --cov-report=xml
 ```
 
 ### 使用方法

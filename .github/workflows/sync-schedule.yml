@@ -22,7 +22,7 @@ jobs:
       run: curl -LsSf https://astral.sh/uv/install.sh | sh
     
     - name: Install dependencies
-      run: uv pip install -e .
+      run: uv pip install --system -e .
     
     - name: Sync spark and gluten
-      run: uv run sync-upstream --token "${{ secrets.SYNC_UPSTREAM_TOKEN }}" --config config.yaml
+      run: uv run --system sync-upstream --token "${{ secrets.SYNC_UPSTREAM_TOKEN }}" --config config.yaml
