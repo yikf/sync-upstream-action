@@ -24,5 +24,5 @@ jobs:
     - name: Install dependencies
       run: uv venv && uv pip install -e .
     
-    - name: Sync spark and gluten
+    - name: Sync spark and vllm
       run: uv run sync-upstream --token "${{ secrets.SYNC_UPSTREAM_TOKEN }}" --config config.yaml
