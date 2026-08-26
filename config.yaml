@@ -2,3 +2,7 @@ owner: Yikf
 repositories:
   - name: spark
   - name: vllm
+  - name: "incubator-gluten"
+    branch: "main"
+    upstream_branch: "main"
+    upstream_repo: "apache/gluten"
