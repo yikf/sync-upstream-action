@@ -6,3 +6,7 @@ repositories:
     branch: "main"
     upstream_branch: "main"
     upstream_repo: "apache/gluten"
+  - name: "velox"
+    branch: "main"
+    upstream_branch: "main"
+    upstream_repo: "facebookincubator/velox"
